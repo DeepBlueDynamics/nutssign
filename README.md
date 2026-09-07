@@ -132,5 +132,3 @@ Management, signer, and file responses carry `Cache-Control: no-store` and
 
 See `.env.example`. `BASE_URL` must be the public URL because it is what goes
 into the emails. `RENDER_DPI` (default 100) controls page image size.
-
-# nutssign
