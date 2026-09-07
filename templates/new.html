@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}New envelope · {{ brand }}{% endblock %}
+{% block nav %}<a href="/" class="navlink">Home</a>{% endblock %}
+{% block content %}
+<h1>New envelope</h1>
+<p class="muted">You will get a private management link as soon as the envelope is created. Keep it: it is the only way back to this document.</p>
+<form class="card form" method="post" action="/envelopes" enctype="multipart/form-data">
+  <label>Document (PDF)
+    <input type="file" name="file" accept="application/pdf" required>
+  </label>
+  <label>Title
+    <input type="text" name="title" placeholder="Residential Lease Agreement - 203 N Alamo St" maxlength="140">
+  </label>
+  <label>Your email <span class="muted">(optional; we send the private management link here)</span>
+    <input type="email" name="creator_email" placeholder="you@example.com">
+  </label>
+  <label>Message to signers <span class="muted">(optional)</span>
+    <textarea name="message" rows="3" placeholder="Please review and sign the lease renewal for 203 N Alamo St."></textarea>
+  </label>
+
+  <h2>Signers</h2>
+  <p class="muted small">Order 1 signs first and gets their link right away. The next signer is emailed only after the one before them has signed, with a copy carrying the signatures so far. Roles are matched to the document's <i>ROLE SIGNATURE</i> headings for automatic field placement.</p>
+  <table class="signers" id="signers">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Order</th><th></th></tr></thead>
+    <tbody>
+      <tr>
+        <td><input type="text" name="signer_name" placeholder="Dena Jones" required></td>
+        <td><input type="email" name="signer_email" placeholder="landlord@example.com" required></td>
+        <td><input type="text" name="signer_role" value="Landlord"></td>
+        <td><input type="number" name="signer_order" value="1" min="1" class="tiny"></td>
+        <td><button type="button" class="link remove" title="Remove">×</button></td>
+      </tr>
+      <tr>
+        <td><input type="text" name="signer_name" placeholder="Mary Sheppard"></td>
+        <td><input type="email" name="signer_email" placeholder="tenant@example.com"></td>
+        <td><input type="text" name="signer_role" value="Tenant"></td>
+        <td><input type="number" name="signer_order" value="2" min="1" class="tiny"></td>
+        <td><button type="button" class="link remove" title="Remove">×</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" class="btn ghost small" id="add-signer">+ Add signer</button>
+
+  <label class="check"><input type="checkbox" name="sequential" checked> Sequential signing (each signer waits for the one before)</label>
+
+  <div class="row end">
+    <a class="btn ghost" href="/">Cancel</a>
+    <button class="btn" type="submit">Create envelope</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const tbody = document.querySelector('#signers tbody');
+  document.getElementById('add-signer').addEventListener('click', function () {
+    const n = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" name="signer_name"></td>' +
+      '<td><input type="email" name="signer_email"></td>' +
+      '<td><input type="text" name="signer_role"></td>' +
+      '<td><input type="number" name="signer_order" value="' + n + '" min="1" class="tiny"></td>' +
+      '<td><button type="button" class="link remove" title="Remove">×</button></td>';
+    tbody.appendChild(tr);
+  });
+  tbody.addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove') && tbody.children.length > 1) e.target.closest('tr').remove();
+  });
+})();
+</script>
+{% endblock %}

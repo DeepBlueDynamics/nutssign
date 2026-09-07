@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Operator list · {{ brand }}{% endblock %}
+{% block content %}
+<div class="row between">
+  <h1>All envelopes <span class="badge tiny">operator only</span></h1>
+  <span class="muted small">email: {{ mail_mode() }}</span>
+</div>
+{% if not envelopes %}
+<div class="card empty"><p>No envelopes yet.</p></div>
+{% else %}
+<table class="list">
+  <thead><tr><th>Document</th><th>Status</th><th>Signers</th><th>Created</th></tr></thead>
+  <tbody>
+  {% for e in envelopes %}
+  <tr>
+    <td><a href="{{ manage_url(e) }}"><b>{{ e.title }}</b></a><div class="muted small">{{ e.page_count }} pages · {{ e.id }}</div></td>
+    <td><span class="badge {{ e.status }}">{{ e.status }}</span></td>
+    <td>{% for s in e.signers|sort(attribute="order") %}<div>{{ s.name }} <span class="muted small">{{ s.role }}</span> <span class="badge tiny {{ s.status }}">{{ s.status }}</span></div>{% endfor %}</td>
+    <td class="muted small">{{ fmt(e.created_at) }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

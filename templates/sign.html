@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Sign: {{ env.title }}{% endblock %}
+{% block brand_href %}#{% endblock %}
+{% block body_class %}signing{% endblock %}
+{% block nav %}<span class="muted small">Signing as <b>{{ signer.name }}</b></span>{% endblock %}
+{% block content %}
+<h1>{{ env.title }}</h1>
+{% set boxes = fields|selectattr("kind", "equalto", "checkbox")|list %}
+<p>Hello {{ signer.name }}. Please review the document below. Your {{ fields|length }} field{{ '' if fields|length == 1 else 's' }} are marked in yellow; dates fill in automatically when you sign.{% if boxes %} Some statements have boxes to mark: click a yellow box to choose it.{% endif %}</p>
+{% if env.message %}<p class="quote">{{ env.message }}</p>{% endif %}
+
+<div id="pages" class="pages signing">
+  {% for n in range(1, env.page_count + 1) %}
+  <div class="page" data-page="{{ n }}">
+    <div class="page-label">Page {{ n }}</div>
+    <div class="page-inner"><img src="/sign/{{ payload.token }}/page/{{ n }}.png" alt="Page {{ n }}" draggable="false"><div class="overlay"></div></div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="signbar">
+  <div class="signbar-left">
+    <label class="check"><input type="checkbox" id="consent"> I agree to sign this document electronically and to receive records electronically (E-SIGN Act; Texas UETA). I have reviewed the document above.</label>
+    <div class="gate small" id="gate-status"></div>
+  </div>
+  <button class="btn" id="open-sign" disabled>Sign now</button>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card">
+    <div class="row between"><h2>Adopt your signature</h2><button type="button" class="link" id="close-modal">close</button></div>
+    <div class="tabs"><button type="button" class="tab active" data-tab="draw">Draw</button><button type="button" class="tab" data-tab="type">Type</button></div>
+    <div class="tabpane" id="pane-draw">
+      <canvas id="pad" width="600" height="180"></canvas>
+      <div class="row between"><span class="muted small">Draw with your mouse or finger.</span><button type="button" class="link" id="clear-pad">clear</button></div>
+    </div>
+    <div class="tabpane" id="pane-type" hidden>
+      <input type="text" id="typed" value="{{ signer.name }}" maxlength="80">
+      <div class="typed-preview" id="typed-preview">{{ signer.name }}</div>
+    </div>
+    <p class="muted small">By clicking Adopt and Sign you agree that this signature will be the electronic representation of your signature for all purposes when you use it on documents, including legally binding contracts, just the same as a pen-and-paper signature.</p>
+    <div class="row end gap"><button type="button" class="btn ghost" id="cancel-sign">Cancel</button><button type="button" class="btn" id="adopt">Adopt and Sign</button></div>
+    <div class="error" id="sign-error" hidden></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script id="payload" type="application/json">{{ payload|tojson }}</script>
+<script src="/static/sign.js"></script>
+{% endblock %}

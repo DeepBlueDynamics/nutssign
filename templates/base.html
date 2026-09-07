@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}{{ brand }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,2.5 27.5,9 27.5,23 16,29.5 4.5,23 4.5,9' fill='%23e8a020'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%230a0a10'/%3E%3C/svg%3E">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div class="grid-bg"></div>
+<header class="top">
+  <a class="brand" href="{% block brand_href %}/{% endblock %}">
+    <span class="hex"><svg viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,2.5 27.5,9 27.5,23 16,29.5 4.5,23 4.5,9" fill="#e8a020"/><circle cx="16" cy="16" r="5.5" fill="#0a0a10"/></svg></span>
+    <span class="brand-text">NUTS.SERVICES <span class="brand-sep">/</span> SIGN</span>
+  </a>
+  <nav>{% block nav %}<a href="https://nuts.services" class="navlink">nuts.services</a><a class="btn small" href="/new">Start an envelope</a>{% endblock %}</nav>
+</header>
+<main class="wrap">
+{% block content %}{% endblock %}
+</main>
+<footer class="foot">{{ brand }} · part of <a href="https://nuts.services">nuts.services</a> · no accounts, no public listings, private links only</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.*
+data
+__pycache__
+*.pyc
+*.log
+*.pdf
+README.md
+deploy.sh
+functional-test.sh
+.nemesis8.toml

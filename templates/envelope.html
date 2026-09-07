@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ env.title }} · {{ brand }}{% endblock %}
+{% block nav %}<a href="/new" class="navlink">New envelope</a>{% endblock %}
+{% block content %}
+<div class="row between wrap-sm">
+  <div>
+    <h1>{{ env.title }} <span class="badge {{ env.status }}">{{ env.status }}</span></h1>
+    <div class="muted small">{{ env.page_count }} pages · created {{ fmt(env.created_at) }}{% if env.sent_at %} · sent {{ fmt(env.sent_at) }}{% endif %}{% if env.completed_at %} · completed {{ fmt(env.completed_at) }}{% endif %}</div>
+  </div>
+  <div class="row gap">
+    <a class="btn ghost small" href="{{ base }}/source.pdf" target="_blank">Original PDF</a>
+    {% if signed_exists %}<a class="btn small" href="{{ base }}/signed.pdf" target="_blank">Signed PDF + certificate</a>{% endif %}
+    {% if env.status == "draft" %}
+    <form method="post" action="{{ base }}/send" onsubmit="return confirm('Start signing now? The first signer gets their link; later signers are emailed after the person before them signs. Fields lock after this.')"><button class="btn" type="submit">Send for signature</button></form>
+    {% elif env.status == "sent" %}
+    <form method="post" action="{{ base }}/void" onsubmit="return confirm('Void this envelope? Signing links stop working.')"><button class="btn danger small" type="submit">Void</button></form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="callout keep">
+  <div><b>Private management link.</b> Bookmark it{% if env.creator_email %} (also emailed to {{ env.creator_email }}){% endif %}. Anyone holding it can manage this envelope, so do not share it.</div>
+  <div class="linkbox"><input type="text" readonly value="{{ manage_url }}" onclick="this.select()"><button type="button" class="link copy" data-copy="{{ manage_url }}">copy</button></div>
+</div>
+
+{% if mail_mode() == "console" %}
+<div class="notice">Email is in <b>console mode</b> (no AGENTMAIL_API_KEY). Nothing is sent; copy each signer's link below and send it yourself.</div>
+{% endif %}
+{% if env.message %}<p class="quote">{{ env.message }}</p>{% endif %}
+{% if env.status == "sent" %}
+{% set due = env.signers_due() %}
+{% if due %}
+<div class="callout">
+  <div><b>{{ due|map(attribute="name")|join(" and ") }}</b> {{ "is" if due|length == 1 else "are" }} up to sign now. The link was emailed{% if mail_mode() == "console" %} (console mode: not really sent){% endif %}; it can also be opened right here.{% if env.unsigned()|length > due|length %} The next signer is emailed automatically, with a copy of the signed pages, as soon as this signature is done.{% endif %}</div>
+  <div class="row gap">{% for s in due %}<a class="btn small" href="{{ sign_url(s) }}">Sign as {{ s.name }}</a>{% endfor %}</div>
+</div>
+{% endif %}
+{% endif %}
+
+<h2>Signers</h2>
+<table class="list">
+  <thead><tr><th>#</th><th>Signer</th><th>Email</th><th>Status</th><th>Signing link</th><th></th></tr></thead>
+  <tbody>
+  {% for s in env.signers|sort(attribute="order") %}
+  <tr>
+    <td>{{ s.order }}</td>
+    <td><b>{{ s.name }}</b><div class="muted small">{{ s.role }}</div></td>
+    <td class="small">{{ s.email }}</td>
+    <td><span class="badge tiny {{ s.status }}">{{ s.status }}</span>
+      <div class="muted small">{% if s.signed_at %}signed {{ fmt(s.signed_at) }}{% elif s.viewed_at %}viewed {{ fmt(s.viewed_at) }}{% elif s.sent_at %}sent {{ fmt(s.sent_at) }}{% elif env.status == "sent" %}waiting for turn{% endif %}</div></td>
+    <td>{% if env.status in ("sent", "completed") %}<div class="linkbox"><input type="text" readonly value="{{ sign_url(s) }}" onclick="this.select()"><button type="button" class="link copy" data-copy="{{ sign_url(s) }}">copy</button></div>{% else %}<span class="muted small">available after sending</span>{% endif %}</td>
+    <td>{% if env.status == "sent" and env.is_turn(s) %}<form method="post" action="{{ base }}/remind/{{ s.id }}"><button class="link" type="submit">resend</button></form>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Fields</h2>
+{% if env.status == "draft" %}
+<div class="toolbar">
+  <label>Signer <select id="tool-signer">{% for s in env.signers|sort(attribute="order") %}<option value="{{ s.id }}">{{ s.name }}{% if s.role %} ({{ s.role }}){% endif %}</option>{% endfor %}</select></label>
+  <label>Field <select id="tool-kind"><option value="signature">Signature</option><option value="date">Date (auto)</option><option value="initials">Initials</option><option value="checkbox">Checkbox</option></select></label>
+  <span class="muted small">Click on a page to place a field. Click × on a field to remove it.</span>
+  <form method="post" action="{{ base }}/autoplace" class="inline"><button class="btn ghost small" type="submit">Auto-place from headings</button></form>
+  <form method="post" action="{{ base }}/fields/clear" class="inline" onsubmit="return confirm('Remove all fields?')"><button class="btn ghost small" type="submit">Clear all</button></form>
+</div>
+{% else %}
+<p class="muted small">Fields are locked. {{ env.fields|length }} fields on this document.</p>
+{% endif %}
+
+<div id="pages" class="pages" data-editable="{{ 'true' if env.status == 'draft' else 'false' }}">
+  {% for n in range(1, env.page_count + 1) %}
+  <div class="page" data-page="{{ n }}">
+    <div class="page-label">Page {{ n }}</div>
+    <div class="page-inner"><img src="{{ base }}/pages/{{ n }}.png" alt="Page {{ n }}" draggable="false"><div class="overlay"></div></div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Audit trail</h2>
+<table class="list small">
+  <thead><tr><th>Time</th><th>Event</th><th>Signer</th><th>IP</th><th>Detail</th></tr></thead>
+  <tbody>
+  {% for e in env.audit %}
+  <tr><td class="muted">{{ fmt(e.ts) }}</td><td>{{ e.event }}</td><td>{% if e.signer_id and env.signer(e.signer_id) %}{{ env.signer(e.signer_id).name }}{% endif %}</td><td class="muted">{{ e.ip or "" }}</td><td>{{ e.detail or "" }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted small mono">Original SHA-256 {{ env.source_sha256 }}{% if env.signed_sha256 %}<br>Signed file SHA-256 {{ env.signed_sha256 }}{% endif %}</p>
+{% endblock %}
+{% block scripts %}
+<script id="payload" type="application/json">{{ payload|tojson }}</script>
+<script src="/static/envelope.js"></script>
+{% endblock %}

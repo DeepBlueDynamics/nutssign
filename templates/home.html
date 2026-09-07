@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ brand }} — private e-signatures{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow mono">§ sign.nuts.services</div>
+  <h1 class="hero-title">N.U.T.S.<br>Signing Service</h1>
+  <p class="hero-lede">Electronic signatures for documents that should not be on the internet. <span class="paper">No accounts.</span> Upload a PDF, name the signers, and everyone gets a private link. Signers sign in order, dates fill themselves in, and the finished PDF comes back with a certificate of completion.</p>
+  <div class="row gap hero-cta">
+    <a class="btn large" href="/new">Start an envelope</a>
+    <span class="muted small">Free to use · nothing is listed publicly · links are 256-bit tokens</span>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="section-label mono">§ 01 · How it works</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-num mono">01</div>
+      <h3>Upload and name the signers</h3>
+      <p>Drop in a PDF and list who signs, in what order. Signature and date lines are found automatically; anything else you place with a click. You get a private management link the moment the envelope exists.</p>
+    </div>
+    <div class="card">
+      <div class="card-num mono">02</div>
+      <h3>Sign in order</h3>
+      <p>The first signer, usually the person who set it up, signs right away. Only then does the next signer get an email: their own link plus a copy carrying the signatures so far. Draw or type your signature; required boxes must be marked before you can sign.</p>
+    </div>
+    <div class="card">
+      <div class="card-num mono">03</div>
+      <h3>Everyone gets the finished document</h3>
+      <p>When the last signature lands, every party receives the signed PDF with a certificate page: who signed, when, from where, consent, and the document hashes. The audit trail lives on the management link.</p>
+    </div>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="section-label mono">§ 02 · Privacy</div>
+  <div class="cards two">
+    <div class="card">
+      <h3>Nothing to browse</h3>
+      <p>There is no index of documents, no search, no login. An envelope is reachable only through its management link and its signing links. Pages and files are served with no-store and no-index headers.</p>
+    </div>
+    <div class="card">
+      <h3>Legally sound</h3>
+      <p>Each signer consents to sign electronically before signing (E-SIGN Act; Texas UETA). The certificate records consent, timestamps, IP addresses, and SHA-256 hashes of the original and signed documents.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

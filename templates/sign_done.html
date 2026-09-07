@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ env.title }}{% endblock %}
+{% block brand_href %}#{% endblock %}
+{% block nav %}<span class="muted small">{{ signer.name }}</span>{% endblock %}
+{% block content %}
+<div class="card center">
+  {% if env.status == "completed" %}
+  <h1>All signed</h1>
+  <p>Everyone has signed <b>{{ env.title }}</b>. The completed document, with its certificate of completion, has been emailed to all parties.</p>
+  <a class="btn" href="/sign/{{ signer.token }}/signed.pdf">Download the signed document</a>
+  {% else %}
+  <h1>Thank you, {{ signer.name.split(' ')[0] }}</h1>
+  <p>Your signature on <b>{{ env.title }}</b> was recorded{% if signer.signed_at %} on {{ fmt(signer.signed_at) }}{% endif %}.</p>
+  <p class="muted">Still waiting on: {{ waiting|join(", ") }}. You will receive the fully signed document by email when everyone has signed.</p>
+  {% endif %}
+</div>
+{% endblock %}

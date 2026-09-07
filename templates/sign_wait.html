@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ env.title }}{% endblock %}
+{% block brand_href %}#{% endblock %}
+{% block nav %}<span class="muted small">{{ signer.name }}</span>{% endblock %}
+{% block content %}
+<div class="card center">
+  <h1>Not your turn yet</h1>
+  <p><b>{{ env.title }}</b> is signed in order. {{ ahead|join(" and ") }} sign{{ 's' if ahead|length == 1 else '' }} first.</p>
+  <p class="muted">You will get an email with a copy of the signed pages and this same link becomes active as soon as it is your turn.</p>
+</div>
+{% endblock %}
